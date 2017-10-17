@@ -81,8 +81,8 @@ pipeline {
                 sh """
                     |ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no root@${server_ip} <<-'ENDSSH'
                     |    set -e
-                    |    cd /opt/openstack-ansible
-                    |    ./scripts/run-playbooks.sh
+                    |    cd /opt/openstack-ansible/playbooks
+                    |    openstack-ansible setup-everything.yml
                     |ENDSSH
 
                     |ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no root@${server_ip} <<-'ENDSSH'
