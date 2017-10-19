@@ -14,12 +14,6 @@ pipeline {
 
     stages {
 
-        stage('Cleanup') {
-            steps {
-                deleteDir()
-            }
-        }
-
         stage('Provision OSA VM') {
             steps {
                 sh """
@@ -117,7 +111,13 @@ pipeline {
                     # Update security group to include ssh
                     openstack --insecure security group rule create \${SECURITY_GROUP_ID} --protocol tcp --dst-port 22
                 """
-            } // Steps
+            }
+        }
+
+        stage('Cleanup') {
+            steps {
+                cleanWs notFailBuild: true
+            } //Steps
         } // Stage
     } // Stages
 
