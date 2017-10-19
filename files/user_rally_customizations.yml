@@ -1,0 +1,9 @@
+rally_pip_packages:
+  - setuptools
+  - pymysql
+  - rally
+  - 'ansible<2.4.0.0'
+
+rally_git_repo: https://github.com/openstack/rally
+rally_git_install_branch: stable/0.9
+rally_git_install_fragments: "venvwithindex=True&ignorerequirements=True"

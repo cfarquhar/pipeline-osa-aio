@@ -62,8 +62,12 @@ pipeline {
             }
         }
 
-        stage ('Running Playbooks') {
+        stage ('Applying Customizations') {
             steps {
+                sh """
+                    |scp -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no ./files/user_rally_customizations.yml root@${server_ip}:/etc/openstack_deploy/
+                """.stripMargin()
+
                 sh """
                     |ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no root@${server_ip} <<-'ENDSSH'
                     |    set -e
@@ -71,18 +75,32 @@ pipeline {
                     |    sed -i 's/^keystone_auth_admin_password.*/keystone_auth_admin_password: ${admin_password}/' /etc/openstack_deploy/user_secrets.yml
                     |ENDSSH
                 """.stripMargin()
+            }
+        }
 
+        stage ('Running Playbooks') {
+            steps {
                 sh """
                     |ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no root@${server_ip} <<-'ENDSSH'
                     |    set -e
                     |    cd /opt/openstack-ansible
                     |    ./scripts/run-playbooks.sh
                     |ENDSSH
+                """.stripMargin()
 
+                sh """
                     |ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no root@${server_ip} <<-'ENDSSH'
                     |set -e
                     |    cd /opt/openstack-ansible/playbooks
                     |    openstack-ansible os-tempest-install.yml
+                    |ENDSSH
+                """.stripMargin()
+
+                sh """
+                    |ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no root@${server_ip} <<-'ENDSSH'
+                    |set -e
+                    |    cd /opt/openstack-ansible/playbooks
+                    |    openstack-ansible os-rally-install.yml
                     |ENDSSH
                 """.stripMargin()
             }
